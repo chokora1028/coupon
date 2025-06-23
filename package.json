@@ -8,6 +8,8 @@
     "predeploy": "echo \"no build step, ready to deploy\"",
     "deploy": "gh-pages -d ."
   },
+  "dependencies": {
+  },
   "devDependencies": {
     "gh-pages": "^6.3.0"
   }
