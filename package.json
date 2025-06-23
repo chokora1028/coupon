@@ -2,7 +2,7 @@
   "name": "coupon",
   "version": "1.0.0",
   "description": "LINE LIFF アプリ：QRコード生成＆ポイント付与テスト用",
-  "homepage": "https://chokora1028/github.io/coupon",
+  "homepage": "https://chokora1028.github.io/coupon",
   "scripts": {
     "start": "serve .",
     "predeploy": "echo \"no build step, ready to deploy\"",
