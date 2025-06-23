@@ -16,7 +16,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     // 4) QRコード生成 (scan.html に code と idToken を渡す)
     const scanUrl =
-      `${APP_CONFIG.MAKE_COUPON_URL}/make_coupon_list.html` +
+      `${APP_CONFIG.MAKE_COUPON_URL}/index.html` +
       `?code=${encodeURIComponent(userId)}` +
       `&shopname=${encodeURIComponent(shopname)}`+
       `&menuname=${encodeURIComponent(menuname)}`;
