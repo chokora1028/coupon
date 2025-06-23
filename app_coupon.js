@@ -14,6 +14,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     const userId  = liff.getContext().userId;
     const idToken = liff.getIDToken();
 
+    shopname = "チョコレートショップ"; // ここは実際のショップ名に置き換えてください
+    menuname = "チョコレートクーポン"; // ここは実際のメニュー名に置き換えてください
     // 4) QRコード生成 (scan.html に code と idToken を渡す)
     const scanUrl =
       `${APP_CONFIG.MAKE_COUPON_URL}/index.html` +

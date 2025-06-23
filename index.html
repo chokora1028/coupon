@@ -73,6 +73,8 @@
       color: #fff;
       border-color: #4285f4;
     }
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    #qrcode { margin: 1rem auto; width:300px; height:300px; }
   </style>
 </head>
 <body>
@@ -155,6 +157,7 @@
           <h3>${name}</h3>
           <img src="${image}" alt="${name}">
           <p>${discountText}</p>
+          <div id="qrcode"></div>
         `;
         sliderTrack.appendChild(slide);
       });
