@@ -16,9 +16,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     // 4) QRコード生成 (scan.html に code と idToken を渡す)
     const scanUrl =
-      `${APP_CONFIG.SCAN_BASE_URL}/scan.html` +
+      `${APP_CONFIG.MAKE_COUPON_URL}/make_coupon_list.html` +
       `?code=${encodeURIComponent(userId)}` +
-      `&idToken=${encodeURIComponent(idToken)}`;
+      `&shopname=${encodeURIComponent(shopname)}`+
+      `&menuname=${encodeURIComponent(menuname)}`;
     const qEl = document.getElementById("qrcode");
     qEl.innerHTML = "";
     new QRCode(qEl, { text: scanUrl, width:300, height:300 });
