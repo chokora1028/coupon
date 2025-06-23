@@ -157,11 +157,17 @@
           <h3>${name}</h3>
           <img src="${image}" alt="${name}">
           <p>${discountText}</p>
-          <div class="qrcode"></div>
+          <div class="qrcode" id="qrcode-${doc.id}"></div>
         `;
         sliderTrack.appendChild(slide);
-      });
 
+      // QRコード生成
+      const qrcodeDiv = slide.querySelector('.qrcode');
+      // QRコードに埋め込む内容（例：クーポン名やURLなど）
+      const qrText = `クーポン:${name} 店舗:${storeName}`;
+      new QRCode(qrcodeDiv, { text: qrText, width: 300, height: 300 });
+      });
+      
       // スライダー初期化
       currentIndex = 0;
       moveSlide(0);
