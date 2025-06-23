@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>QRスキャン受付</title>
+  <script src="config.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    h1 { margin-bottom: .5rem; }
+  </style>
+</head>
+<body>
+  <h1>QRスキャン受付</h1>
+  <p id="msg">ポイントを付与中…</p>
+
+  <script>
+    (async () => {
+      const params  = new URLSearchParams(location.search);
+      const code    = params.get("code")    || "";
+      const idToken = params.get("idToken") || "";
+      const msgEl   = document.getElementById("msg");
+
+      if (!code || !idToken) {
+        msgEl.textContent = "不正なアクセスです";
+        return;
+      }
+
+      try {
+        // ポイント付与
+        const res = await fetch(APP_CONFIG.AZURE_FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type":  "application/json",
+            "Authorization": "Bearer " + idToken
+          },
+          body: JSON.stringify({
+            userId: code,
+            points: 150,
+            scanInfo: {
+              qrText:    code,
+              timestamp: new Date().toISOString()
+            }
+          })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        msgEl.textContent = "ポイントを付与しました！";
+
+        // localStorage にスキャン完了フラグをセット
+        localStorage.setItem("scanCompleted", Date.now().toString());
+
+      } catch (err) {
+        console.error(err);
+        msgEl.textContent = "付与に失敗しました";
+      }
+    })();
+  </script>
+</body>
+</html>
