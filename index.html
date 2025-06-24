@@ -18,9 +18,9 @@
    <!-- 試し -->
   <style>
     .slider-container {
-      width: 100%;
+      width: 320px;
       margin: 0 auto;
-      max-width: 400px;
+      overflow: hidden;
       position: relative;
     }
     .slider-track {
@@ -28,7 +28,7 @@
       transition: transform 0.3s;
     }
     .slide {
-      min-width: 100%;
+      min-width: 320px;
       box-sizing: border-box;
       padding: 10px;
       text-align: center;
@@ -39,18 +39,19 @@
       object-fit: cover;
       border-radius: 10px;
     }
-    .slider-btns {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 8px;
-    }
     .slider-btn {
-      position: static;
-      transform: none;
-      margin: 0 8px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 2;
     }
-    
     .slider-btn.prev { left: 0; }
     .slider-btn.next { right: 0; }
     .info { margin-bottom: 10px; }
@@ -73,7 +74,9 @@
       border-color: #4285f4;
     }
     body { font-family: sans-serif; text-align: center; padding: 2rem; }
-    .qrcode { margin: 1rem auto; width:300px; height:300px; }
+    #qrcode { margin: 1rem auto; width:300px; height:300px; }
+    #pointDisplay { font-size:2rem; font-weight:bold; margin-top:1rem; display:none; }
+
   </style>
 </head>
 <body>
@@ -82,14 +85,11 @@
     <span id="userName"></span> さん<br>
     <span id="shopName"></span>
   </div>
-  <!-- スライダー本体 -->
-<div class="slider-container">
-  <div class="slider-track" id="sliderTrack"></div>
-  <div class="slider-btns">
+  <div class="slider-container">
     <button class="slider-btn prev" onclick="moveSlide(-1)">&#8592;</button>
+    <div class="slider-track" id="sliderTrack"></div>
     <button class="slider-btn next" onclick="moveSlide(1)">&#8594;</button>
   </div>
-</div>
   <script>
     // Firebase設定
     const firebaseConfig = {
@@ -159,15 +159,8 @@
           <h3>${name}</h3>
           <img src="${image}" alt="${name}">
           <p>${discountText}</p>
-          <div class="qrcode" id="qrcode-${doc.id}"></div>
         `;
         sliderTrack.appendChild(slide);
-
-      // QRコード生成
-      const qrcodeDiv = slide.querySelector('.qrcode');
-      // QRコードに埋め込む内容（例：クーポン名やURLなど）
-      const qrText = `クーポン:${name} 店舗:${storeName}`;
-      new QRCode(qrcodeDiv, { text: qrText, width: 300, height: 300 });
       });
 
       // スライダー初期化
