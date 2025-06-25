@@ -184,12 +184,16 @@
     // 初期化
     window.addEventListener('DOMContentLoaded', createStoreTabs);
 
-  /*
+  
 
   function getQueryParam(name) {
     const params = new URLSearchParams(window.location.search);
+    if (!params.has(name)) {
+      return null; // パラメータが存在しない場合はnullを返す
+    }
     return params.get(name);
   }
+  
   const userId = getQueryParam('userId');
   if (!userId) {
     alert("userIdが指定されていません。");
@@ -230,7 +234,7 @@
     height: 200
   });
 });
-*/
+
 
   </script>
 </body>
