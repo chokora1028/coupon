@@ -13,7 +13,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     // 3) userIdを取得
     const userId  = liff.getContext().userId;
     if (!userId) {
-      document.body.insertAdjacentHTML('afterbegin', `<div>userId: ${userId}</div>`);
       throw new Error("userId が取得できませんでした");
     }
 
