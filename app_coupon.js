@@ -15,8 +15,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     const idToken = liff.getIDToken();
 
     // index.htmlにuserIdを渡して遷移
-    // window.location.href = `index.html?userId=${encodeURIComponent(userId)}`;
+    window.location.href = `index.html?userId=${encodeURIComponent(userId)}`;
 
+    //ここより下実行されない
     // 4) QRコード生成 (scan.html に code と idToken を渡す)
     const scanUrl =
       `${APP_CONFIG.MAKE_COUPON_URL}/index.html` +
