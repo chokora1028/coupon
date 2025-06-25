@@ -16,7 +16,7 @@ const omurice = omu_riceRef.set({
   discountRate: null,
 });
 
-const tamagoyakiRef = db.collection('龍谷食堂').doc('卵焼き');
+const tamagoyakiRef = db.collection('龍谷食堂').doc('オムライス');
 
 const tamagoyaki = tamagoyakiRef.set({
   store_name: '龍谷食堂',
@@ -24,6 +24,7 @@ const tamagoyaki = tamagoyakiRef.set({
   cuisine_URL: 'image\money_coin_america_10_reverse.png',
   discountAmount: null,
   discountRate: 30,
+  store_name_id: "ryukoku_shokudo",
 });
 
 const tonkoturamenRef = db.collection('宮本屋').doc('豚骨ラーメン');
@@ -34,6 +35,7 @@ const ramen = tonkoturamenRef.set({
   cuisine_URL: 'image\money_coin_america_10_reverse.png',
   discountAmount: null,
   discountRate: 14,
+  store_name_id: "miyamoto_ya",
 });
 
 /*

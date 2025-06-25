@@ -122,7 +122,6 @@
         if (idx === 0) tab.classList.add('active');
         tabContainer.appendChild(tab);
       });
-      // 最初の店舗のクーポンを表示
       if (storeNames.length > 0) {
         loadCoupons(storeNames[0]);
       }
@@ -139,6 +138,7 @@
       document.getElementById('userName').textContent = "ゲスト";
       document.getElementById('shopName').textContent = storeName;
 
+      const userId = getQueryParam('userId') || "test_user_123"; // userIdがなければ仮値
       const snapshot = await db.collection(storeName).get();
       const sliderTrack = document.getElementById('sliderTrack');
       sliderTrack.innerHTML = "";
@@ -158,12 +158,24 @@
 
         const slide = document.createElement('div');
         slide.className = 'slide';
+        // QRコード用divのidをユニークに
+        const qrDivId = `slide-qrcode-${storeName}-${name}`;
         slide.innerHTML = `
           <h3>${name}</h3>
           <img src="${image}" alt="${name}">
           <p>${discountText}</p>
+          <div class="slide-qrcode" id="${qrDivId}"></div>
         `;
         sliderTrack.appendChild(slide);
+
+        // QRコード生成
+        setTimeout(() => {
+        new QRCode(document.getElementById(qrDivId), {
+          text: `${userId}+${storeName}+${name}`,
+          width: 200,
+          height: 200
+          });
+        }, 0);
       });
 
       // スライダー初期化
@@ -193,49 +205,6 @@
     }
     return params.get(name);
   }
-  
-
-  // 実験用：userId + 店名 + 最初の料理名でQRコードを表示
-  window.addEventListener('DOMContentLoaded', async () => {
-  const userId = getQueryParam('userId');
-  if (!userId) {
-    alert("userIdが指定されていません。");
-    return;
-  } else {
-    console.log("userId:", userId);
-  }
-  const storeNames = ["ryukokusyokudou", "miyamotoya"];
-  const storeName = storeNames[0]; // 1つ目の店名
-
-  // Firestoreから最初の料理名を取得
-  const snapshot = await db.collection(storeName).get();
-  let firstMenuName = "";
-  if (!snapshot.empty) {
-    firstMenuName = snapshot.docs[0].id; // ドキュメント名（料理名）
-  }
-
-  // QRコード用テキスト
-  const qrText = `${userId}+${storeName}+${firstMenuName}`;
-
-  // QRコード表示用divを作成してbodyの下に追加
-  let qrDiv = document.getElementById('experiment-qr');
-  if (!qrDiv) {
-    qrDiv = document.createElement('div');
-    qrDiv.id = 'experiment-qr';
-    qrDiv.style.margin = "2rem auto";
-    document.body.appendChild(qrDiv);
-  }
-  qrDiv.innerHTML = ""; // 既存QRコードを消す
-
-  // QRコード生成
-  new QRCode(qrDiv, {
-    text: qrText,
-    width: 200,
-    height: 200
-  });
-});
-
-
   </script>
 </body>
 </html>
