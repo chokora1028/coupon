@@ -11,17 +11,18 @@ const omu_riceRef = db.collection('龍谷食堂').doc('オムライス');
 const omurice = omu_riceRef.set({
   store_name: '龍谷食堂',
   cuisinn_name: 'omurice',
-  cuisine_URL: 'image\money_coin_america_10_reverse.png',
+  cuisine_URL: 'image/money_coin_america_10_obverse.png',
   discountAmount: 100,
   discountRate: null,
+  store_name_id: "ryukoku_shokudo",
 });
 
-const tamagoyakiRef = db.collection('龍谷食堂').doc('オムライス');
+const tamagoyakiRef = db.collection('龍谷食堂').doc('玉子焼き');
 
 const tamagoyaki = tamagoyakiRef.set({
   store_name: '龍谷食堂',
   cuisinn_name: 'tamagoyaki',
-  cuisine_URL: 'image\money_coin_america_10_reverse.png',
+  cuisine_URL: 'image/money_coin_america_10_obverse.png',
   discountAmount: null,
   discountRate: 30,
   store_name_id: "ryukoku_shokudo",
@@ -32,7 +33,7 @@ const tonkoturamenRef = db.collection('宮本屋').doc('豚骨ラーメン');
 const ramen = tonkoturamenRef.set({
   store_name: '宮本屋',
   cuisinn_name: 'tonkotu_ramen',
-  cuisine_URL: 'image\money_coin_america_10_reverse.png',
+  cuisine_URL: 'image/money_coin_america_10_obverse.png',
   discountAmount: null,
   discountRate: 14,
   store_name_id: "miyamoto_ya",
