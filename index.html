@@ -194,16 +194,16 @@
     return params.get(name);
   }
   
-  const userId = getQueryParam('userId');
-  if (!userId) {
-    alert("userIdが指定されていません。");
-  } else {
-    console.log("userId:", userId);
-  }
 
   // 実験用：userId + 店名 + 最初の料理名でQRコードを表示
   window.addEventListener('DOMContentLoaded', async () => {
   const userId = getQueryParam('userId');
+  if (!userId) {
+    alert("userIdが指定されていません。");
+    return;
+  } else {
+    console.log("userId:", userId);
+  }
   const storeNames = ["ryukokusyokudou", "miyamotoya"];
   const storeName = storeNames[0]; // 1つ目の店名
 
