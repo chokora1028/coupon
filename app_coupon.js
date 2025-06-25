@@ -1,6 +1,10 @@
 // public/app.js
 
 window.addEventListener("DOMContentLoaded", async () => {
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('userId')) return;
+
   try {
     // 1) LIFF 初期化
     await liff.init({ liffId: APP_CONFIG.LIFF_ID });
