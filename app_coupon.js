@@ -10,9 +10,12 @@ window.addEventListener("DOMContentLoaded", async () => {
       return liff.login({ redirectUri: location.href });
     }
 
-    // 3) userId と idToken を取得（idToken は scan.html 用）
+    // 3) userIdを取得
     const userId  = liff.getContext().userId;
-    const idToken = liff.getIDToken();
+    if (!userId) {
+      document.body.insertAdjacentHTML('afterbegin', `<div>userId: ${userId}</div>`);
+      throw new Error("userId が取得できませんでした");
+    }
 
     // index.htmlにuserIdを渡して遷移
     window.location.href = `index.html?userId=${encodeURIComponent(userId)}`;
