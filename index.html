@@ -91,6 +91,13 @@
     <button class="slider-btn next" onclick="moveSlide(1)">&#8594;</button>
   </div>
   <script>
+
+  function getQueryParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+  }
+  const userId = getQueryParam('userId');
+
     // Firebase設定
     const firebaseConfig = {
       apiKey: "AIzaSyDWHQk8BgmQudT9GvlZpiP59w7dhVg7ifU",
@@ -180,6 +187,41 @@
 
     // 初期化
     window.addEventListener('DOMContentLoaded', createStoreTabs);
+
+    // 実験用：userId + 店名 + 最初の料理名でQRコードを表示
+window.addEventListener('DOMContentLoaded', async () => {
+  const userId = getQueryParam('userId');
+  const storeNames = ["ryukokusyokudou", "miyamotoya"];
+  const storeName = storeNames[0]; // 1つ目の店名
+
+  // Firestoreから最初の料理名を取得
+  const snapshot = await db.collection(storeName).get();
+  let firstMenuName = "";
+  if (!snapshot.empty) {
+    firstMenuName = snapshot.docs[0].id; // ドキュメント名（料理名）
+  }
+
+  // QRコード用テキスト
+  const qrText = `${userId}+${storeName}+${firstMenuName}`;
+
+  // QRコード表示用divを作成してbodyの下に追加
+  let qrDiv = document.getElementById('experiment-qr');
+  if (!qrDiv) {
+    qrDiv = document.createElement('div');
+    qrDiv.id = 'experiment-qr';
+    qrDiv.style.margin = "2rem auto";
+    document.body.appendChild(qrDiv);
+  }
+  qrDiv.innerHTML = ""; // 既存QRコードを消す
+
+  // QRコード生成
+  new QRCode(qrDiv, {
+    text: qrText,
+    width: 200,
+    height: 200
+  });
+});
+
   </script>
 </body>
 </html>
