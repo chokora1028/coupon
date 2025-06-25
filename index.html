@@ -92,11 +92,7 @@
   </div>
   <script>
 
-  function getQueryParam(name) {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(name);
-  }
-  const userId = getQueryParam('userId');
+  
 
     // Firebase設定
     const firebaseConfig = {
@@ -189,6 +185,18 @@
     window.addEventListener('DOMContentLoaded', createStoreTabs);
 
   /*
+
+  function getQueryParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+  }
+  const userId = getQueryParam('userId');
+  if (!userId) {
+    alert("userIdが指定されていません。");
+  } else {
+    console.log("userId:", userId);
+  }
+
   // 実験用：userId + 店名 + 最初の料理名でQRコードを表示
   window.addEventListener('DOMContentLoaded', async () => {
   const userId = getQueryParam('userId');
