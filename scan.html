@@ -17,9 +17,10 @@
 
   <script>
   (async () => {
-    const params = new URLSearchParams(window.location.search);
-    const code   = params.get("code") || "";
-    const msgEl  = document.getElementById("msg");
+    const params        = new URLSearchParams(window.location.search);
+    const code          = params.get("code") || "";
+    const pointsToAward = 20;  // 付与するポイント数
+    const msgEl         = document.getElementById("msg");
 
     // code のみチェック
     if (!code) {
@@ -37,7 +38,7 @@
         },
         body: JSON.stringify({
           userId: code,
-          points: 20,
+          points: pointsToAward,
           scanInfo: {
             qrText:    code,
             timestamp: new Date().toISOString()
@@ -50,8 +51,8 @@
         throw new Error(`HTTP ${res.status}: ${err.error || res.statusText}`);
       }
 
-      const json = await res.json();
-      msgEl.textContent = `ポイントを付与しました！累計 ${json.totalPoints} 点`;
+      // 成功したら「○○ポイントを付与しました！」と表示
+      msgEl.textContent = `${pointsToAward}ポイントを付与しました！`;
     } catch (err) {
       console.error(err);
       msgEl.textContent = "付与に失敗しました";
