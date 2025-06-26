@@ -39,7 +39,7 @@
           userId: code,
           points: 20,
           scanInfo: {
-            qrText:   code,
+            qrText:    code,
             timestamp: new Date().toISOString()
           }
         })
@@ -51,7 +51,7 @@
       }
 
       const json = await res.json();
-      msgEl.textContent = `${pointsToAward}ポイントを付与しました！`;
+      msgEl.textContent = `ポイントを付与しました！累計 ${json.totalPoints} 点`;
     } catch (err) {
       console.error(err);
       msgEl.textContent = "付与に失敗しました";
