@@ -17,13 +17,13 @@
 
   <script>
   (async () => {
-    const params  = new URLSearchParams(window.location.search);
-    const code    = params.get("code") || "";
-    const msgEl   = document.getElementById("msg");
-    const idToken = localStorage.getItem("liffIdToken") || "";
+    const params = new URLSearchParams(window.location.search);
+    const code   = params.get("code") || "";
+    const msgEl  = document.getElementById("msg");
 
-    if (!code || !idToken) {
-      msgEl.textContent = "不正なアクセス、またはログイン情報がありません";
+    // code のみチェック
+    if (!code) {
+      msgEl.textContent = "不正なアクセスです";
       return;
     }
 
@@ -33,8 +33,7 @@
       const res = await fetch(APP_CONFIG.AZURE_FUNCTION_URL, {
         method: "POST",
         headers: {
-          "Content-Type":  "application/json",
-          "Authorization": "Bearer " + idToken
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           userId: code,
@@ -45,10 +44,14 @@
           }
         })
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      msgEl.textContent = "ポイントを付与しました！";
-      localStorage.setItem("scanCompleted", Date.now().toString());
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`HTTP ${res.status}: ${err.error || res.statusText}`);
+      }
+
+      const json = await res.json();
+      msgEl.textContent = `ポイントを付与しました！累計 ${json.totalPoints} 点`;
     } catch (err) {
       console.error(err);
       msgEl.textContent = "付与に失敗しました";
