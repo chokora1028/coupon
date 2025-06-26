@@ -14,22 +14,18 @@
 <body>
   <h1>QRスキャン受付</h1>
   <p id="msg">ポイントを付与中…</p>
-
   <script>
   (async () => {
     const params = new URLSearchParams(window.location.search);
     const code   = params.get("code") || "";
     const msgEl  = document.getElementById("msg");
-
     // code のみチェック
     if (!code) {
       msgEl.textContent = "不正なアクセスです";
       return;
     }
-
     try {
       msgEl.textContent = "ポイントを付与中…";
-
       const res = await fetch(APP_CONFIG.AZURE_FUNCTION_URL, {
         method: "POST",
         headers: {
@@ -44,14 +40,12 @@
           }
         })
       });
-
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(`HTTP ${res.status}: ${err.error || res.statusText}`);
       }
-
       const json = await res.json();
-      msgEl.textContent = `ポイントを付与しました！累計 ${json.totalPoints} 点`;
+      msgEl.textContent = `ポイントを${points}点付与しました！`;
     } catch (err) {
       console.error(err);
       msgEl.textContent = "付与に失敗しました";
