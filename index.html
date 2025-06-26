@@ -7,8 +7,7 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-   <!-- LIFF SDK -->
+  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,73 +15,19 @@
   <script src="config.js"></script>
   <!-- 本体ロジック -->
   <script src="app_coupon.js" defer></script>
-   <!-- 試し -->
   <style>
-    .info {
-      margin-bottom: 10px;
-      text-align: center;
-    }
-    .slider-container {
-      width: 320px;
-      margin: 0 auto;
-      overflow: hidden;
-      position: relative;
-    }
-    .slider-track {
-      display: flex;
-      transition: transform 0.3s;
-    }
-    .slide {
-      min-width: 320px;
-      box-sizing: border-box;
-      padding: 10px;
-      text-align: center;
-    }
-    .slide img {
-      width: 200px;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-      display: block;
-      margin: 0 auto;
-    }
-    .slider-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      font-size: 18px;
-      z-index: 2;
-    }
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    .info { margin-bottom: 10px; }
+    #storeTabs { display: flex; gap: 8px; margin-bottom: 16px; justify-content: center; }
+    .store-tab { padding: 8px 16px; border: 1px solid #ccc; background: #f8f8f8; cursor: pointer; border-radius: 4px; }
+    .store-tab.active { background: #4285f4; color: #fff; border-color: #4285f4; }
+    .slider-container { width: 320px; margin: 0 auto; overflow: hidden; position: relative; }
+    .slider-track { display: flex; transition: transform 0.3s; }
+    .slide { min-width: 320px; box-sizing: border-box; padding: 10px; text-align: center; }
+    .slide img { width: 200px; height: 200px; object-fit: cover; border-radius: 10px; display: block; margin: 0 auto; }
+    .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: #fff; border: 1px solid #ccc; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 18px; z-index: 2; }
     .slider-btn.prev { left: 0; }
     .slider-btn.next { right: 0; }
-    .info { margin-bottom: 10px; }
-    #storeTabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      justify-content: center;
-    }
-    .store-tab {
-      padding: 8px 16px;
-      border: 1px solid #ccc;
-      background: #f8f8f8;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .store-tab.active {
-      background: #4285f4;
-      color: #fff;
-      border-color: #4285f4;
-    }
-    body { font-family: sans-serif; text-align: center; padding: 2rem; }
-    #qrcode { margin: 1rem auto; width:300px; height:300px; }
-
   </style>
 </head>
 <body>
@@ -96,121 +41,130 @@
     <div class="slider-track" id="sliderTrack"></div>
     <button class="slider-btn next" onclick="moveSlide(1)">&#8594;</button>
   </div>
-  <script>
-
-  
-
-    // Firebase設定
-    const firebaseConfig = {
-      apiKey: "AIzaSyDWHQk8BgmQudT9GvlZpiP59w7dhVg7ifU",
-      authDomain: "kinakomoti-77d00.firebaseapp.com",
-      projectId: "kinakomoti-77d00",
-      storageBucket: "kinakomoti-77d00.appspot.com",
-      messagingSenderId: "1041967003917",
-      appId: "1:1041967003917:web:e172dba27978de2b005844",
-      measurementId: "G-6FV1BEECF0"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // 店舗一覧（コレクション名一覧）を取得してタブを作成
-    async function createStoreTabs() {
-      // コレクション名一覧を取得（Firestoreのコレクション一覧取得APIはないので、店舗名は配列で管理するか、別コレクションで管理するのが一般的）
-      // ここでは例として配列で用意
-      const storeNames = ["龍谷食堂", "宮本屋"];
-      const tabContainer = document.getElementById('storeTabs');
-      tabContainer.innerHTML = "";
-      storeNames.forEach((store, idx) => {
-        const tab = document.createElement('button');
-        tab.textContent = store;
-        tab.className = 'store-tab';
-        tab.onclick = () => loadCoupons(store);
-        if (idx === 0) tab.classList.add('active');
-        tabContainer.appendChild(tab);
-      });
-      if (storeNames.length > 0) {
-        loadCoupons(storeNames[0]);
-      }
-    }
-
-    // クーポンデータを取得してスライド表示
-    async function loadCoupons(storeName) {
-      // タブのactive切り替え
-      document.querySelectorAll('.store-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.textContent === storeName);
-      });
-
-      // ユーザー名は仮で固定
-      document.getElementById('userName').textContent = "ゲスト";
-      document.getElementById('shopName').textContent = storeName;
-
-      const userId = getQueryParam('userId') || "test_user_123"; // userIdがなければ仮値
-      const snapshot = await db.collection(storeName).get();
-      const sliderTrack = document.getElementById('sliderTrack');
-      sliderTrack.innerHTML = "";
-
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const name = data.name || doc.id;
-        const image = data.cuisine_URL;
-        let discountText = "";
-        if (data.discountAmount) {
-          discountText = `${data.discountAmount}円引き`;
-        } else if (data.discountRate) {
-          discountText = `${data.discountRate}%引き`;
-        } else {
-          discountText = "割引なし";
-        }
-
-        const slide = document.createElement('div');
-        slide.className = 'slide';
-        // QRコード用divのidをユニークに
-        const qrDivId = `slide-qrcode-${storeName}-${name}`;
-        slide.innerHTML = `
-          <h3>${name}</h3>
-          <img src="${image}" alt="${name}">
-          <p>${discountText}</p>
-          <div class="slide-qrcode" id="${qrDivId}"></div>
-        `;
-        sliderTrack.appendChild(slide);
-
-        // QRコード生成
-        setTimeout(() => {
-        new QRCode(document.getElementById(qrDivId), {
-          text: `${userId}+${storeName}+${name}`,
-          width: 200,
-          height: 200
-          });
-        }, 0);
-      });
-
-      // スライダー初期化
-      currentIndex = 0;
-      moveSlide(0);
-    }
-
-    // スライダー制御
-    let currentIndex = 0;
-    function moveSlide(dir) {
-      const total = document.querySelectorAll('.slide').length;
-      currentIndex += dir;
-      if (currentIndex < 0) currentIndex = 0;
-      if (currentIndex > total - 1) currentIndex = total - 1;
-      document.getElementById('sliderTrack').style.transform = `translateX(${-320 * currentIndex}px)`;
-    }
-
-    // 初期化
-    window.addEventListener('DOMContentLoaded', createStoreTabs);
-
-  
-
-  function getQueryParam(name) {
-    const params = new URLSearchParams(window.location.search);
-    if (!params.has(name)) {
-      return null; // パラメータが存在しない場合はnullを返す
-    }
-    return params.get(name);
-  }
-  </script>
 </body>
 </html>
+21:49
+// app_coupon.js
+
+// Firebase 設定（index.html に書いてあっても再度読み込んで大丈夫です）
+const firebaseConfig = {
+  apiKey: "AIzaSyDWHQk8BgmQudT9GvlZpiP59w7dhVg7ifU",
+  authDomain: "kinakomoti-77d00.firebaseapp.com",
+  projectId: "kinakomoti-77d00",
+  storageBucket: "kinakomoti-77d00.appspot.com",
+  messagingSenderId: "1041967003917",
+  appId: "1:1041967003917:web:e172dba27978de2b005844",
+  measurementId: "G-6FV1BEECF0"
+};
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  let userId = params.get("userId");
+
+  // ユーザーID がなければ LIFF ログイン→取得→リダイレクト
+  if (!userId) {
+    try {
+      await liff.init({ liffId: APP_CONFIG.LIFF_ID });
+      if (!liff.isLoggedIn()) {
+        return liff.login({ redirectUri: location.href });
+      }
+      userId = liff.getContext().userId;
+      if (!userId) throw new Error("ユーザーID が取得できませんでした");
+      // userId をクエリに乗せてリロード
+      return window.location.replace(`${location.pathname}?userId=${encodeURIComponent(userId)}`);
+    } catch (err) {
+      console.error("LIFF 初期化エラー:", err);
+      return;
+    }
+  }
+
+  // userId がある場合、クーポン表示ロジックを開始
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // UI 要素参照
+  const tabContainer   = document.getElementById("storeTabs");
+  const sliderTrack    = document.getElementById("sliderTrack");
+  const userNameEl     = document.getElementById("userName");
+  const shopNameEl     = document.getElementById("shopName");
+
+  // 定義：店舗タブを作成
+  function createStoreTabs() {
+    const storeNames = ["龍谷食堂", "宮本屋"];
+    tabContainer.innerHTML = "";
+    storeNames.forEach((store, i) => {
+      const btn = document.createElement("button");
+      btn.textContent = store;
+      btn.className = "store-tab" + (i === 0 ? " active" : "");
+      btn.addEventListener("click", () => loadCoupons(store));
+      tabContainer.appendChild(btn);
+    });
+    // 最初の店舗をロード
+    if (storeNames.length) loadCoupons(storeNames[0]);
+  }
+
+  // 定義：クーポンを取得してスライド表示
+  let currentIndex = 0;
+  window.moveSlide = (dir) => {
+    const total = document.querySelectorAll(".slide").length;
+    currentIndex = Math.min(Math.max(currentIndex + dir, 0), total - 1);
+    sliderTrack.style.transform = `translateX(${-320 * currentIndex}px)`;
+  };
+
+  async function loadCoupons(storeName) {
+    // タブのアクティブ切り替え
+    document.querySelectorAll(".store-tab").forEach(btn => {
+      btn.classList.toggle("active", btn.textContent === storeName);
+    });
+    // ユーザー名・店舗名表示
+    userNameEl.textContent = "ゲスト";  // 必要に応じて他の情報を入れてください
+    shopNameEl.textContent = storeName;
+
+    // Firestore からクーポンデータ取得
+    const snapshot = await db.collection(storeName).get();
+    sliderTrack.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const name = data.name || doc.id;
+      const image = data.cuisine_URL || "";
+      const discountText = data.discountAmount
+        ? `${data.discountAmount}円引き`
+        : data.discountRate
+          ? `${data.discountRate}%引き`
+          : "割引なし";
+
+      // スライド要素作成
+      const slide = document.createElement("div");
+      slide.className = "slide";
+      const qrDivId = `qr-${storeName}-${name}`;
+      slide.innerHTML = `
+        <h3>${name}</h3>
+        <img src="${image}" alt="${name}">
+        <p>${discountText}</p>
+        <div id="${qrDivId}"></div>
+      `;
+      sliderTrack.appendChild(slide);
+
+      // QR を生成
+      const scanUrl = [
+        APP_CONFIG.MAKE_COUPON_URL + "/index.html",
+        `?code=${encodeURIComponent(userId)}`,
+        `&shopname=${encodeURIComponent(storeName)}`,
+        `&menuname=${encodeURIComponent(name)}`
+      ].join("");
+      new QRCode(document.getElementById(qrDivId), {
+        text: scanUrl,
+        width: 200,
+        height: 200
+      });
+    });
+
+    // スライドを先頭にリセット
+    currentIndex = 0;
+    moveSlide(0);
+  }
+
+  // 初期化
+  createStoreTabs();
+});
