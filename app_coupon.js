@@ -101,7 +101,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
       // QR コード生成
       const scanUrl = [
-        APP_CONFIG.MAKE_COUPON_URL + "/index.html",
+        APP_CONFIG.MAKE_COUPON_URL + "/scan.html",
         `?code=${encodeURIComponent(userId)}`,
         `&shopname=${encodeURIComponent(storeName)}`,
         `&menuname=${encodeURIComponent(name)}`

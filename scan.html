@@ -4,57 +4,78 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>QRスキャン受付</title>
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <!-- 設定 -->
   <script src="config.js"></script>
   <style>
     body { font-family: sans-serif; text-align: center; padding: 2rem; }
     h1 { margin-bottom: .5rem; }
+    #msg { margin-top: 1rem; font-size: 1.2rem; }
   </style>
 </head>
 <body>
   <h1>QRスキャン受付</h1>
-  <p id="msg">ポイントを付与中…</p>
+  <p id="msg">準備中…</p>
 
   <script>
-    (async () => {
-      const params  = new URLSearchParams(location.search);
-      const code    = params.get("code")    || "";
-      const idToken = params.get("idToken") || "";
-      const msgEl   = document.getElementById("msg");
+  (async () => {
+    const msgEl  = document.getElementById("msg");
+    const params = new URLSearchParams(window.location.search);
+    const code   = params.get("code");
 
-      if (!code || !idToken) {
-        msgEl.textContent = "不正なアクセスです";
+    if (!code) {
+      msgEl.textContent = "不正なアクセスです";
+      return;
+    }
+
+    try {
+      // 1) LIFF 初期化
+      await liff.init({ liffId: APP_CONFIG.LIFF_ID });
+
+      // 2) 未ログインならログイン（リダイレクト後に再度このコードが動きます）
+      if (!liff.isLoggedIn()) {
+        return liff.login({ redirectUri: location.href });
+      }
+
+      // 3) ID トークン取得
+      const idToken = liff.getIDToken();
+      if (!idToken) {
+        msgEl.textContent = "ID トークンが取得できませんでした";
         return;
       }
 
-      try {
-        // ポイント付与
-        const res = await fetch(APP_CONFIG.AZURE_FUNCTION_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type":  "application/json",
-            "Authorization": "Bearer " + idToken
-          },
-          body: JSON.stringify({
-            userId: code,
-            points: 150,
-            scanInfo: {
-              qrText:    code,
-              timestamp: new Date().toISOString()
-            }
-          })
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      msgEl.textContent = "ポイントを付与中…";
 
-        msgEl.textContent = "ポイントを付与しました！";
+      // 4) Azure Function へ POST
+      const res = await fetch(APP_CONFIG.AZURE_FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "Authorization": "Bearer " + idToken
+        },
+        body: JSON.stringify({
+          userId:   code,
+          points:   20,
+          scanInfo: {
+            qrText:    code,
+            timestamp: new Date().toISOString()
+          }
+        })
+      });
 
-        // localStorage にスキャン完了フラグをセット
-        localStorage.setItem("scanCompleted", Date.now().toString());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      } catch (err) {
-        console.error(err);
-        msgEl.textContent = "付与に失敗しました";
-      }
-    })();
+      msgEl.textContent = "ポイントを付与しました！";
+
+      // 5) 必要なら localStorage にフラグを残す
+      localStorage.setItem("scanCompleted", Date.now().toString());
+
+    } catch (err) {
+      console.error(err);
+      msgEl.textContent = "付与に失敗しました";
+    }
+  })();
   </script>
 </body>
 </html>
