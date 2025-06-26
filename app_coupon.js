@@ -1,6 +1,6 @@
 // app_coupon.js
 
-// Firebase 設定（index.html に書いてあっても再度読み込んで大丈夫です）
+// Firebase 設定
 const firebaseConfig = {
   apiKey: "AIzaSyDWHQk8BgmQudT9GvlZpiP59w7dhVg7ifU",
   authDomain: "kinakomoti-77d00.firebaseapp.com",
@@ -15,7 +15,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   let userId = params.get("userId");
 
-  // ユーザーID がなければ LIFF ログイン→取得→リダイレクト
+  // userId がなければ LIFF ログイン→取得→リダイレクト
   if (!userId) {
     try {
       await liff.init({ liffId: APP_CONFIG.LIFF_ID });
@@ -24,7 +24,6 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
       userId = liff.getContext().userId;
       if (!userId) throw new Error("ユーザーID が取得できませんでした");
-      // userId をクエリに乗せてリロード
       return window.location.replace(`${location.pathname}?userId=${encodeURIComponent(userId)}`);
     } catch (err) {
       console.error("LIFF 初期化エラー:", err);
@@ -32,17 +31,25 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // userId がある場合、クーポン表示ロジックを開始
+  // userId 取得後の処理
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // UI 要素参照
-  const tabContainer   = document.getElementById("storeTabs");
-  const sliderTrack    = document.getElementById("sliderTrack");
-  const userNameEl     = document.getElementById("userName");
-  const shopNameEl     = document.getElementById("shopName");
+  // UI 要素
+  const tabContainer = document.getElementById("storeTabs");
+  const sliderTrack  = document.getElementById("sliderTrack");
+  const userNameEl   = document.getElementById("userName");
+  const shopNameEl   = document.getElementById("shopName");
 
-  // 定義：店舗タブを作成
+  // スライド移動用グローバル関数
+  let currentIndex = 0;
+  window.moveSlide = (dir) => {
+    const total = document.querySelectorAll(".slide").length;
+    currentIndex = Math.min(Math.max(currentIndex + dir, 0), total - 1);
+    sliderTrack.style.transform = `translateX(${-320 * currentIndex}px)`;
+  };
+
+  // 店舗タブ作成
   function createStoreTabs() {
     const storeNames = ["龍谷食堂", "宮本屋"];
     tabContainer.innerHTML = "";
@@ -53,28 +60,20 @@ window.addEventListener("DOMContentLoaded", async () => {
       btn.addEventListener("click", () => loadCoupons(store));
       tabContainer.appendChild(btn);
     });
-    // 最初の店舗をロード
     if (storeNames.length) loadCoupons(storeNames[0]);
   }
 
-  // 定義：クーポンを取得してスライド表示
-  let currentIndex = 0;
-  window.moveSlide = (dir) => {
-    const total = document.querySelectorAll(".slide").length;
-    currentIndex = Math.min(Math.max(currentIndex + dir, 0), total - 1);
-    sliderTrack.style.transform = `translateX(${-320 * currentIndex}px)`;
-  };
-
+  // クーポン取得＆QR生成
   async function loadCoupons(storeName) {
-    // タブのアクティブ切り替え
+    // タブの active 切り替え
     document.querySelectorAll(".store-tab").forEach(btn => {
       btn.classList.toggle("active", btn.textContent === storeName);
     });
     // ユーザー名・店舗名表示
-    userNameEl.textContent = "ゲスト";  // 必要に応じて他の情報を入れてください
-    shopNameEl.textContent = storeName;
+    userNameEl.textContent = "ゲスト";
+    shopNameEl.textContent  = storeName;
 
-    // Firestore からクーポンデータ取得
+    // Firestore からデータ取得
     const snapshot = await db.collection(storeName).get();
     sliderTrack.innerHTML = "";
 
@@ -88,7 +87,7 @@ window.addEventListener("DOMContentLoaded", async () => {
           ? `${data.discountRate}%引き`
           : "割引なし";
 
-      // スライド要素作成
+      // スライド要素を生成
       const slide = document.createElement("div");
       slide.className = "slide";
       const qrDivId = `qr-${storeName}-${name}`;
@@ -100,7 +99,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       `;
       sliderTrack.appendChild(slide);
 
-      // QR を生成
+      // QR コード生成
       const scanUrl = [
         APP_CONFIG.MAKE_COUPON_URL + "/index.html",
         `?code=${encodeURIComponent(userId)}`,
@@ -114,11 +113,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       });
     });
 
-    // スライドを先頭にリセット
+    // スライド先頭に戻す
     currentIndex = 0;
     moveSlide(0);
   }
 
-  // 初期化
+  // 初期処理
   createStoreTabs();
 });
