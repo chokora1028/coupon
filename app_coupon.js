@@ -24,6 +24,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
       userId = liff.getContext().userId;
       if (!userId) throw new Error("ユーザーID が取得できませんでした");
+
+      // ここで一度だけ ID トークンを取得して保存
+      const idToken = liff.getIDToken();
+      localStorage.setItem("liffIdToken", idToken);
+
       return window.location.replace(`${location.pathname}?userId=${encodeURIComponent(userId)}`);
     } catch (err) {
       console.error("LIFF 初期化エラー:", err);
